@@ -1,0 +1,49 @@
+# Object files
+*.o
+*.obj
+*.ko
+*.so
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+/lib
+*.lib
+*.a
+*.la
+
+# Compiled Dynamic libraries
+*.dll
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.elf
+
+# Temporary files
+*.swp
+*~
+*.bak
+
+# Build directories
+build/
+Debug/
+Release/
+CMakeFiles/
+CMakeCache.txt
+*.cmake
+
+# IDE project files
+/.vscode
+/.idea
+
+# Log files
+*.log
+
+# local test file, used for trial and error
+testa
+testa.cc
