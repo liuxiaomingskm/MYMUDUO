@@ -10,6 +10,9 @@
 
 class Channel;
 class EventLoop;
+
+// typedef struct _log_line log_line;
+
 // muduo库中多路事件分发器的核心IO复用模块
 class Poller: noncopyable
  {
