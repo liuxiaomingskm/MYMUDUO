@@ -1,7 +1,6 @@
 #pragma once
 
 #include "noncopyable.h"
-// #include "Poller.h"
 
 #include <thread>
 #include <memory>
@@ -10,14 +9,6 @@
 #include <atomic>
 #include <functional>
 
-// typedef struct _log_line {
-//     char *data;
-//     int len;
-//     int fd;
-// } log_line;
-
-// struct _log_line;
-// extern _log_line *log_line_head;
 
 class Thread : noncopyable {
     public:
@@ -39,7 +30,7 @@ class Thread : noncopyable {
 
         bool started_;
         bool joined_; //当前线程等待其他线程
-        std::shared_ptr<std::thread> thread_;
+        std::shared_ptr<std::thread> thread_; // 这里不能写作Thread thread之类的 会被理解成直接创建thread 因此用shared_ptr表示
         pid_t tid_;
         ThreadFunc func_;
         std::string name_;
