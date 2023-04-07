@@ -1,11 +1,12 @@
 #include "EventLoopThread.h"
 #include "EventLoop.h"
 
+
 EventLoopThread::EventLoopThread(const ThreadInitCallBack &cb,
         const std::string &name)
         : loop_(nullptr)
         , exiting_(false)
-        , thread_(std::bind(EventLoopThread::threadFunc, this),name)  
+        , thread_(std::bind(&EventLoopThread::threadFunc, this),name)  
         , mutex_() // 默认构造函数，不需要构造一个mutex然后传进去
         , cond_() // 默认构造函数
         , callback_(cb)
@@ -32,7 +33,12 @@ EventLoop* EventLoopThread::startLoop()
 
     {
         std::unique_lock<std::mutex> lock(mutex_);
-        while(loop_ == nullptr)
+        /**
+         * 这里必须设置一个while循环 因为C++允许spurious wakeup.
+         * Spurious wakeups are when a thread waiting on a condition variable is awakened without the condition variable being explicitly signaled or notified.
+         * 所以为了保证loop_不为空，必须在loop_不为空的时候才能退出while循环
+        */
+        while(loop_ == nullptr) 
         {
             cond_.wait(lock);
         }
