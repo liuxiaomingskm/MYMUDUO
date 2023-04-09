@@ -79,7 +79,7 @@ EventLoop:: EventLoop()
             }
             //执行当前EventLoop事件循环需要处理的回调操作
             /**
-            * IO线程 mainLoop accept fd <<= channel subloop
+            * IO线程 mainLoop accept fd =>> channel subloop
             * mainLoop 事先注册一个回调cb（需要subloop来执行） wakeup subloop后，执行下面的方法，执行之前mainloop注册的cb操作,
             * 这里的callback都放在vector<Functor>中
             */
@@ -194,3 +194,25 @@ EventLoop:: EventLoop()
       }
 
 
+
+/**
+ * Difference meaning of block and non-block in epoll_wait and eventFd
+The epoll_wait function is used to wait for events on file descriptors monitored by an epoll instance. It has a timeout parameter that determines how long the function should block if there are no events available:
+
+If the timeout is set to -1, epoll_wait will block indefinitely until an event occurs.
+If the timeout is set to 0, epoll_wait will return immediately, even if no events are available (i.e., it's non-blocking).
+If the timeout is set to a positive value, epoll_wait will block for up to that number of milliseconds waiting for an event.
+The blocking or non-blocking mode of a file descriptor affects its read and write operations, not the behavior of epoll_wait. When you add a file descriptor to an epoll instance, the epoll instance will monitor the file descriptor for events, such as data being available to read or the descriptor being ready to accept a write operation.
+
+If a file descriptor is set to non-blocking mode and epoll_wait returns an event for that descriptor, you can perform read or write operations on the descriptor without blocking. However, if the file descriptor is in blocking mode and there's not enough data to read or space to write, the read or write operations will block until the conditions are met, even if epoll_wait itself didn't block.
+
+In summary, the blocking mode of a file descriptor affects its read and write operations but not the behavior of epoll_wait. The behavior of epoll_wait is determined by its timeout parameter.
+
+
+so set file descriptor in non-block mode, means if it try to read data, it will immediately read all data and return. If there is no data avaiable, it will still return?
+Yes, that's correct. When a file descriptor is set to non-blocking mode, read operations behave as follows:
+
+If there is data available to read, the read operation will immediately read as much data as possible (up to the specified buffer size) and then return the number of bytes read.
+If there is no data available to read at the moment, the read operation will not block and wait for data. Instead, it will immediately return -1, and the errno variable will be set to EAGAIN or EWOULDBLOCK, indicating that the operation would have blocked if the file descriptor were in blocking mode.
+In non-blocking mode, the program can continue executing other tasks without waiting for data to become available on the file descriptor. This can help improve the responsiveness and performance of event-driven or asynchronous applications.
+*/
