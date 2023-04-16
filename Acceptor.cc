@@ -9,11 +9,12 @@
 
 static int createNonblocking()
 {
-    int sockfd = ::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0); // ? what this socket do?
+    int sockfd = ::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0); 
     if (sockfd < 0)
     {
         LOG_FATAL("%s:%s:%d, listen socket create error:%d \n", __FILE__, __FUNCTION__, __LINE__,errno);
     }
+    return sockfd;
 }
 
 Acceptor::Acceptor(EventLoop * loop, const InetAddress &listenAddr, bool reuseport)
@@ -45,8 +46,7 @@ void Acceptor::listen()
     // listenfd有事件发生了，就是有新用户链接了
 void Acceptor::handleRead()
 {
-    sockaddr_in addr1; //自己写的
-    InetAddress peerAddr(addr1);
+    InetAddress peerAddr;
     int connfd = acceptSocket_.accept(&peerAddr);
     if (connfd >= 0)
     {
@@ -54,7 +54,7 @@ void Acceptor::handleRead()
             newConnectionCallback_(connfd, peerAddr); //connfd 新链接fd，peerAddr客户端地址和端口 轮询找到subLoop，唤醒，分发当前的新客户端的channel
         }
         else {
-            ::close(connfd); // ?
+            ::close(connfd); // 如果没有回调函数，就直接关闭
         }
     }
     else {

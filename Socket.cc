@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <strings.h> // only for strcasecmp, strncasecmp, bzero
-#include <netinet/tcp.h>
+#include <netinet/tcp.h> // for TCP_NODELAY and all other tCP socket options
 #include <sys/socket.h>
 
 Socket::~Socket() {
