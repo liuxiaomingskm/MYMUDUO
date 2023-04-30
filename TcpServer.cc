@@ -43,7 +43,7 @@ TcpServer::~TcpServer()
 
         //销毁链接
         conn -> getLoop() -> runInLoop(
-            std::bind(&TcpConnection::connectDestroyed, conn)
+            std::bind(&TcpConnection::connectionDestroyed, conn)
         );
     }
 }
@@ -78,6 +78,17 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr)
         name_.c_str(), connName.c_str(), peerAddr.toIpPort().c_str());
 
     // 通过sockfd获取其绑定的本机的ip地址和端口信息
+    sockaddr_in local;
+    ::bzero(&local, sizeof local);
+    socklen_t addrlen = sizeof local;
+    if (::getsockname(sockfd, (sockaddr*)&local, &addrlen)<0) 
+    {
+        LOG_ERROR("sockets::getLocalAddr");
+    }
+
+    InetAddress localAddr(local);
+
+    // 根据链接成功的sockfd，创建TcpConnection对象
     TcpConnectionPtr conn(new TcpConnection(
                             ioLoop,
                             connName,
@@ -95,7 +106,7 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr)
     conn -> setCloseCallback(std::bind(&TcpServer::removeConnection, this, std::placeholders::_1));
 
     //直接调用TcpConnection::connectEstablished()，这个函数会在TcpConnection所属的loop中执行
-    ioLoop -> runInLoop(std::bind(&TcpConnection::connectEstablished, conn));
+    ioLoop -> runInLoop(std::bind(&TcpConnection::connectionEstablished, conn));
 
 }
 
@@ -111,5 +122,5 @@ void TcpServer::removeConnectionInLoop(const TcpConnectionPtr &conn)
 
     connections_.erase(conn -> name());
     EventLoop *ioLoop = conn -> getLoop();
-    ioLoop -> queueInLoop(std::bind(&TcpConnection::connectDestroyed, conn));
+    ioLoop -> queueInLoop(std::bind(&TcpConnection::connectionDestroyed, conn));
 }
