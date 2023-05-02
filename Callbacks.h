@@ -8,7 +8,10 @@ class Buffer;
 class TcpConnection;
 class Timestamp;
 
-using TcpConnectionPtr = std::shared_ptr<TcpConnection>;
+// In asynchronous netowrking like Muduo, where multiple parts of the application might hold references 
+// to the same TcpConnection, it is important to use shared_ptr to manage the lifetime of the TcpConnection object. 
+// Otherwise, the TcpConnection object might be destroyed while some other part of the application still has a reference to it.
+using TcpConnectionPtr = std::shared_ptr<TcpConnection>; 
 using ConnectionCallback = std::function<void (const TcpConnectionPtr&)>;
 using CloseCallback = std::function<void (const TcpConnectionPtr&)>;
 using WriteCompleteCallback = std::function<void (const TcpConnectionPtr&)>;

@@ -67,7 +67,7 @@ TcpConnection::TcpConnection(EventLoop *loop,
         {
 
                 if (loop_->isInLoopThread()){
-                    sendInLoop(buf.c_str(), buf.size());
+                    sendInLoop(buf.c_str(), buf.size()); // 这里我们传的是string而不是buffer，因此不用调用retriveAll()来重置读index的位置
                 }
                 else {
                     loop_->runInLoop(
@@ -102,7 +102,7 @@ TcpConnection::TcpConnection(EventLoop *loop,
                 remaining = len - nwrote;
                 if (remaining == 0 && writeCompleteCallback_)
                 {
-                    // 既然在这里数据全部发送完毕，就不用在给channel设置epollout事件了
+                    // 既然在这里数据全部发送完毕，就不用在给channel设置epollout事件了 handleWrite的前提是outputBuffer_中有待发送数据，而这里全部发送完毕了，也就不会往outputBuffer_中写数据了
                     loop_->queueInLoop(
                         std::bind(writeCompleteCallback_, shared_from_this())
                     );
@@ -114,7 +114,7 @@ TcpConnection::TcpConnection(EventLoop *loop,
                 if (errno != EWOULDBLOCK)
                 {
                     LOG_ERROR("TcpConnection::sendInLoop \n");
-                    if (errno == EPIPE || errno == ECONNRESET) // SIGPIPE RESET
+                    if (errno == EPIPE || errno == ECONNRESET) // SIGPIPE RESET，客户端socket重置
                     {
                         faultError = true;
                     }
@@ -124,9 +124,9 @@ TcpConnection::TcpConnection(EventLoop *loop,
 
 
         /**
-         *  说明大概年前这一次write，并没有把数据全部发送出去，剩余的数据需要保存到缓冲区中，然后给channel
-         * 注册epollout事件，poller发现tcp的发送缓冲区有空间，会通知相应的socket-channel, 调用writeCallback回调方法
-         * 也就是调用TcpConnection::handleWrite方法，把发送缓冲区的数据全部发送完毕
+         *  说明大概先前这一次write，并没有把数据全部发送出去，剩余的数据需要保存到缓冲区中，然后给channel
+         * 注册epollout事件，poller发现tcp的发送缓冲区(不是当前的outputBuffer，而是系统自带的buffer)有空间，会通知相应的socket-channel, 调用writeCallback回调方法
+         * 也就是调用TcpConnection::handleWrite方法， handleWrite方法再判断outputBuffer是否全部发送，没有发送继续发送，直到把发送缓冲区的数据全部发送完毕
         */
        if (!faultError && remaining > 0)
        {

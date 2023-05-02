@@ -31,13 +31,13 @@ void Channel::tie(const std::shared_ptr<void>& obj){
 void Channel::update() {
     //通过channel所属的eventLoop，调用poller的相应方法来注册fd的events事件
     // add code ...
-    // loop -> updateChannel(this);
+    loop_ -> updateChannel(this);
 }
 
 //在channel所属的eventLoop中，把当前的channel删除掉
 void Channel::remove(){
     // add code
-   // loop_ -> removeChannel(this);
+   loop_ -> removeChannel(this);
 }
 
 //fd得到poller通知以后，处理事件

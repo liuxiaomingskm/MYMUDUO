@@ -40,7 +40,7 @@ public:
 
     bool connected() const {return state_ == kConnected;}
 
-    //发送数据
+    //发送数据 调用messageCallback结束后，系统可能需要给客户端发送消息，所以需要提供一个send接口
     void send(const std::string &buff);
 
     void send(const void *message, size_t len);
