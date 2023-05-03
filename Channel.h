@@ -76,6 +76,10 @@ class Channel : noncopyable
     int revents_; //poller返回的具体事件
     int index_; 
 
+/**
+ * using a std::weak_ptr for the tie_ member variable helps manage object lifetimes, avoid circular dependencies, 
+ * and ensure that the "tied" object is not kept alive longer than necessary.主要是为了防止循环引用
+*/
     std::weak_ptr<void> tie_;
     
     bool tie_d;

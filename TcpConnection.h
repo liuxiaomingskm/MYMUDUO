@@ -64,9 +64,9 @@ public:
     {closeCallback_ = cb;}
 
     //链接建立
-    void connectionEstablished();
+    void connectEstablished();
     //链接销毁
-    void connectionDestroyed();
+    void connectDestroyed();
 private:
     enum StateE {kConnecting, kDisconnected,kConnected, kDisconnecting};
     void setState (StateE state) {state_ = state;}

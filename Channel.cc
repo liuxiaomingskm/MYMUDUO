@@ -18,7 +18,8 @@ Channel::~Channel()
 {
 }
 
-// channel的tie方法什么时候调用过？
+// channel的tie方法什么时候调用过？ 为什么要tie？ 因为这里的obj其实是TcpConnection的shared_from_this() 所有的回调函数 其实都是tecpConnection的成员函数，
+// 所以为了防止调用的时候TcpConnection已经析构了，所以需要绑定一个shared_ptr来延长TcpConnection的生命周期
 void Channel::tie(const std::shared_ptr<void>& obj){
     tie_ = obj;
     tie_d = true;
@@ -59,7 +60,7 @@ void Channel::handleEventWithGuard(Timestamp receiveTime) {
 
     if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN))
     {
-        if (closeCallback_)
+        if (closeCallback_) // 调用的是TcpConnection::handleClose方法
         {
             closeCallback_();
         }

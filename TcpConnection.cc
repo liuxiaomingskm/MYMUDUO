@@ -162,14 +162,14 @@ TcpConnection::TcpConnection(EventLoop *loop,
 
      void TcpConnection::shutdownInLoop()
      {
-        if (!channel_->isWriting()) // 说明outputBuffer_中的数据已经全部发送完毕
+        if (!channel_->isWriting()) // 说明outputBuffer_中的数据已经全部发送完毕，可以直接关闭写端，否则跳过shutdown，等待数据发送完毕后，由handleWrite关闭写端
         {
             socket_->shutdownWrite(); // 关闭写端
         }
      }
 
      // 链接建立
-     void TcpConnection::connectionEstablished()
+     void TcpConnection::connectEstablished()
      {
         setState(kConnected);
         channel_->tie(shared_from_this());
@@ -180,7 +180,7 @@ TcpConnection::TcpConnection(EventLoop *loop,
      }
 
      // 链接销毁
-     void TcpConnection::connectionDestroyed()
+     void TcpConnection::connectDestroyed()
      {
         if (state_ == kConnected)
         {
@@ -231,7 +231,7 @@ TcpConnection::TcpConnection(EventLoop *loop,
                             std::bind(writeCompleteCallback_, shared_from_this())
                         );
                     }
-                    if (state_ == kDisconnecting)
+                    if (state_ == kDisconnecting) // 如果用户在写入数据期间调用了shutdown方法，此时数据持续写入中无法及时关闭，因此在写入数据完毕后关闭链接
                     {
                         shutdownInLoop();
                     }

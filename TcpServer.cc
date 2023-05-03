@@ -43,7 +43,7 @@ TcpServer::~TcpServer()
 
         //销毁链接
         conn -> getLoop() -> runInLoop(
-            std::bind(&TcpConnection::connectionDestroyed, conn)
+            std::bind(&TcpConnection::connectDestroyed, conn)
         );
     }
 }
@@ -106,7 +106,7 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr)
     conn -> setCloseCallback(std::bind(&TcpServer::removeConnection, this, std::placeholders::_1));
 
     //直接调用TcpConnection::connectEstablished()，这个函数会在TcpConnection所属的loop中执行
-    ioLoop -> runInLoop(std::bind(&TcpConnection::connectionEstablished, conn));
+    ioLoop -> runInLoop(std::bind(&TcpConnection::connectEstablished, conn));
 
 }
 
@@ -122,5 +122,5 @@ void TcpServer::removeConnectionInLoop(const TcpConnectionPtr &conn)
 
     connections_.erase(conn -> name());
     EventLoop *ioLoop = conn -> getLoop();
-    ioLoop -> queueInLoop(std::bind(&TcpConnection::connectionDestroyed, conn));
+    ioLoop -> queueInLoop(std::bind(&TcpConnection::connectDestroyed, conn));
 }
