@@ -28,6 +28,7 @@ int createFd(){
     return evtfd;
 }
 
+// 每个eventloop都有一个单独的epollfd，用来上树和下树channel
 EventLoop:: EventLoop()
     : looping_(false),
       quit_(false),

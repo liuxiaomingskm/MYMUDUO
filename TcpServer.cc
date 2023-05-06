@@ -23,7 +23,7 @@ TcpServer :: TcpServer(EventLoop *loop,
                         , name_(nameArg)
                         , acceptor_(new Acceptor(loop, listenAddr, option == kReusePort))
                         , threadPool_(new EventLoopThreadPool(loop, name_))
-                        , connectionCallback_()
+                        , connectionCallback_() // empty function object 如果用户没有设置回调，就是空函数对象，没有任何操作
                         , messageCallback_()
                         , nextConnId_(1)
                         , started_(0)
@@ -38,6 +38,8 @@ TcpServer::~TcpServer()
     for (auto &item: connections_)
     {
         //这个局部的shared_ptr智能指针对象，出右括号，可以自动释放new出来的TcpConnection对象的资源
+        //整个程序每个connection都只有一个shared_ptr指向，而这个指针就是map里的value，创建新conn，reference count + 1,
+        // 调用reset，reference count - 1,最后局部变量conn跳出scope时，销毁conn自动释放资源
         TcpConnectionPtr conn(item.second);
         item.second.reset();
 
@@ -71,7 +73,7 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr)
     EventLoop* ioLoop = threadPool_ ->getNextLoop();
     char buf[64] = {0};
     snprintf(buf, sizeof buf, "-%s#%d", ipPort_.c_str(), nextConnId_);
-    ++nextConnId_;
+    ++nextConnId_; //只有在mainloop中执行，所以不需要加锁
     std::string connName = name_ + buf;
 
     LOG_INFO("TcpServer::newConnection [%s] - new Connection [%s]  from %s \n",
@@ -92,7 +94,7 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr)
     TcpConnectionPtr conn(new TcpConnection(
                             ioLoop,
                             connName,
-                            sockfd, // socket channel
+                            sockfd, // socket channel 通过sockfd可以创建channel和Socket对象
                             localAddr,
                             peerAddr));
 
@@ -122,5 +124,6 @@ void TcpServer::removeConnectionInLoop(const TcpConnectionPtr &conn)
 
     connections_.erase(conn -> name());
     EventLoop *ioLoop = conn -> getLoop();
+    //connection设置了coonectDestoryed和connectEstablished的回调，这里通过TcpServer::removeConnectionInLoop()来调用
     ioLoop -> queueInLoop(std::bind(&TcpConnection::connectDestroyed, conn));
 }

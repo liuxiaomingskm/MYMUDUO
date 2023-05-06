@@ -35,6 +35,8 @@ public:
                 Option option = kNoReusePort);
     ~TcpServer();
 
+// tcpServer能够设置不同的回调函数 并且传入TcpConnection，但是对所有的TcpConnection都是一样的回调函数 如果需要设置不同的回调函数
+// 可以在回调函数内进行判断
     void setThreadInitCallback (const ThreadInitCallback &cb) {threadInitCallback_ = cb;}
     void setConnectionCallback (const ConnectionCallback &cb) {connectionCallback_ = cb;}
     void setMessageCallback (const MessageCallback &cb) {messageCallback_ = cb;}
