@@ -9,7 +9,7 @@ const int Channel::kReadEvent = EPOLLIN | EPOLLPRI;
 const int Channel::kWriteEvent = EPOLLOUT;
 
 Channel::Channel(EventLoop *loop, int fd_)
-    : loop_(loop), fd_(fd_), events_(0), revents_(0), index_(-1), tie_d(false) // index是当前channel的状态 是否已经添加到epoll中
+    : loop_(loop), fd_(fd_), events_(0), revents_(0), index_(-1), tied_(false) // index是当前channel的状态 是否已经添加到epoll中
 {
 
 }
@@ -22,7 +22,7 @@ Channel::~Channel()
 // 所以为了防止调用的时候TcpConnection已经析构了，所以需要绑定一个shared_ptr来延长TcpConnection的生命周期
 void Channel::tie(const std::shared_ptr<void>& obj){
     tie_ = obj;
-    tie_d = true;
+    tied_ = true;
 }
 
 /**
@@ -43,7 +43,7 @@ void Channel::remove(){
 
 //fd得到poller通知以后，处理事件
 void Channel::handleEvent(Timestamp receiveTime) {
-    if(tie_d) {
+    if(tied_) {
         std::shared_ptr<void> guard = tie_.lock(); //提升weak pinter
         if (guard){
             handleEventWithGuard(receiveTime);

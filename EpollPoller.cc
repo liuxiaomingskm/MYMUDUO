@@ -141,8 +141,8 @@ void EpollPoller::update(int operation, Channel* channel)
     int fd = channel -> fd();
 
     event.events = channel -> events();
-    event.data.ptr = channel;
     event.data.fd = fd; //该代码错误，data是union集合 只能赋值一次，所以不能同时赋予ptr和fd 这里只是和视频代码保持一致 
+    event.data.ptr = channel;
 
     if (::epoll_ctl(epollfd_, operation, fd, &event) < 0)
     {

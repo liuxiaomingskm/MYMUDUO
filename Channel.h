@@ -70,7 +70,7 @@ class Channel : noncopyable
     static const int kReadEvent;
     static const int kWriteEvent;
 
-    EventLoop* loop_; //事件循环
+    EventLoop *loop_; //事件循环
     const int fd_; // fd, poller监听的对象
     int events_; //注册fd感兴趣的事件
     int revents_; //poller返回的具体事件
@@ -82,7 +82,7 @@ class Channel : noncopyable
 */
     std::weak_ptr<void> tie_;
     
-    bool tie_d;
+    bool tied_;
 
 // 因为channel通道里面能够获知fd最终发生的具体事件revents, 所以他负责调用具体事件的回调
     ReadEventCallback readCallback_;
