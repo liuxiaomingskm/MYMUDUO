@@ -7,7 +7,7 @@
 
 
 //网络底层的缓冲器类型定义
-/// A buffer class modeled after org.jboss.netty.buffer.ChannelBuffer
+/// A buffer class modeled simulate org.jboss.netty.buffer.ChannelBuffer
 ///
 /// @code
 /// +-------------------+------------------+------------------+
@@ -92,9 +92,9 @@ public:
         }
     }
 
-    // 把[data, data+len)的数据写入到writable缓冲区当中
+    // 把[data, data+len)的数据写入到vector所对应的writable缓冲区当中
     // readerIndex_为可读数据的起始位置，writerIndex_为可写数据的起始位置
-    // 无论是从fd上读取数据 或者把数据写入buffer中，都需要写如writable对应的缓冲区
+    // 无论是从fd上读取数据 或者把数据写入buffer中，都需要写入writable对应的缓冲区
     void append(const char* data, size_t len)
     {
         ensureWritableBytes(len);

@@ -22,8 +22,10 @@ ssize_t Buffer::readFd(int fd, int *savedErrno)
 
     vec[1].iov_base = extrabuf;
     vec[1].iov_len = sizeof extrabuf;
-
-    const int iovcnt = (writable < sizeof extrabuf) ? 2 : 1; // 两个缓冲区都有空间，就使用两个缓冲区，否则只使用一个缓冲区
+  // when there is enough space in this buffer, don't read into extrabuf.
+  // when extrabuf is used, we read 128k-1 bytes at most.
+    const int iovcnt = (writable < sizeof extrabuf) ? 2 : 1; // 两个缓冲区都有空间，就使用两个缓冲区，否则只使用一个缓冲区 当writable 大于 extrabuf时，把数据读入extrabuf意义不大，因为extrabuf只有64k
+  // when extrabuf is used, we read 128k-1 bytes at most.
     const ssize_t n = ::readv(fd, vec, iovcnt);
 
     if (n < 0)

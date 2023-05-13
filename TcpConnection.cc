@@ -172,7 +172,7 @@ TcpConnection::TcpConnection(EventLoop *loop,
      void TcpConnection::connectEstablished()
      {
         setState(kConnected);
-        channel_->tie(shared_from_this());
+        channel_->tie(shared_from_this()); // 因为channel对应的callback都来自于TcpConnection，因此需要把TcpConnection对象绑定到channel上，否则万一TcpConnection对象析构了，channel还在使用回调函数，就会出错
         channel_->enableReading(); // 向poller注册channel的epollin事件
 
         //新链接建立，执行回调
